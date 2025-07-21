@@ -135,6 +135,8 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import psycopg2
 import urllib.parse as urlparse
+import time
+import requests
 
 app = FastAPI()
 
@@ -185,6 +187,16 @@ init_db()
 @app.get("/comment", response_class=HTMLResponse)
 async def comment_page(request: Request):
     return templates.TemplateResponse("comment.html", {"request": request})
+
+@app.get("/ubort")
+async def ubort():
+    time.sleep(5)
+    TARGET_URL = "https://ubort.onrender.com"
+    try:
+        response = requests.get(TARGET_URL, timeout=5)
+        return {"fetched_url": TARGET_URL, "status_code": response.status_code}
+    except requests.RequestException as e:
+        return {"fetched_url": TARGET_URL, "error": str(e)}
 
 @app.get("/")
 async def image_home():
