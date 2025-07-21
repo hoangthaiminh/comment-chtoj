@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Gửi bình luận</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <form id="commentForm">
+    <label for="content">Bình luận:</label>
+    <textarea id="content" name="content" rows="5" maxlength="300" required></textarea>
+
+    <button type="submit">Đăng</button>
+    <div id="status"></div>
+  </form>
+
+  <dialog id="nameDialog">
+    <form method="dialog">
+      <label for="dialogUsername">Tên của bạn:</label>
+      <input type="text" id="dialogUsername" name="dialogUsername" maxlength="20" required>
+      <button id="saveName">Lưu</button>
+    </form>
+  </dialog>
+
+  <script>
+    const USERNAME_REGEX = /^[a-zA-ZÀ-ỹ\s]{1,20}$/;
+    const COMMENT_REGEX = /^[\p{L}0-9\s.,;:!?()[\]\-_'"\\/]{1,300}$/u;
+
+    const usernameInput = document.getElementById('dialogUsername');
+    const contentInput = document.getElementById('content');
+    const form = document.getElementById('commentForm');
+    const statusDiv = document.getElementById('status');
+    const dialog = document.getElementById('nameDialog');
+    const saveNameButton = document.getElementById('saveName');
+
+    if (!localStorage.getItem('usrname')) {
+      dialog.showModal();
+    }
+
+    saveNameButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      const name = usernameInput.value.trim();
+      if (USERNAME_REGEX.test(name)) {
+        localStorage.setItem('usrname', name);
+        dialog.close();
+      } else {
+        alert('Tên không hợp lệ.');
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = localStorage.getItem('usrname')?.trim();
+      const content = contentInput.value.trim();
+
+      if (!USERNAME_REGEX.test(username)) {
+        statusDiv.textContent = 'Tên không hợp lệ.';
+        statusDiv.style.color = 'red';
+        return;
+      }
+      if (!COMMENT_REGEX.test(content)) {
+        statusDiv.textContent = 'Nội dung không hợp lệ.';
+        statusDiv.style.color = 'red';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('content', content);
+
+      const res = await fetch('/submit', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.status === 'ok') {
+        statusDiv.textContent = 'Đăng bình luận thành công!';
+        statusDiv.style.color = 'green';
+        contentInput.value = '';
+      } else {
+        statusDiv.textContent = data.message || 'Lỗi không xác định.';
+        statusDiv.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

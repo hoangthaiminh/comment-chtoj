@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: comment-fastapi
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: comment-db
+          property: connectionString
+
+databases:
+  - name: comment-db
+    plan: free

@@ -1,0 +1,77 @@
+body {
+    font-family: "Roboto", sans-serif;
+    background: #f4f7fa;
+    margin: 0;
+    padding: 2em;
+}
+
+form {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 0.75em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 1em;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: border 0.2s ease;
+    font-family: "Roboto", sans-serif;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+button {
+    background: linear-gradient(to bottom, #4a90e2, #357ab7);
+    border: none;
+    color: white;
+    padding: 0.75em 1.5em;
+    font-size: 1em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-family: "Roboto", sans-serif;
+}
+
+button:hover {
+    background: linear-gradient(to bottom, #5aa2f2, #3f8dd1);
+}
+
+button:active {
+    background: linear-gradient(to bottom, #357ab7, #357ab7);
+}
+
+#status {
+    margin-top: 1em;
+    font-size: 0.9em;
+    color: #555;
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+}
