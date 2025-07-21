@@ -188,15 +188,15 @@ init_db()
 async def comment_page(request: Request):
     return templates.TemplateResponse("comment.html", {"request": request})
 
-@app.get("/ubort")
-async def ubort():
-    time.sleep(1)
-    TARGET_URL = "https://ubort.onrender.com"
-    try:
-        response = requests.get(TARGET_URL, timeout=5)
-        return {"fetched_url": TARGET_URL, "status_code": response.status_code}
-    except requests.RequestException as e:
-        return {"fetched_url": TARGET_URL, "error": str(e)}
+# @app.get("/ubort")
+# async def ubort():
+#     time.sleep(1)
+#     TARGET_URL = "https://ubort.onrender.com"
+#     try:
+#         response = requests.get(TARGET_URL, timeout=5)
+#         return {"fetched_url": TARGET_URL, "status_code": response.status_code}
+#     except requests.RequestException as e:
+#         return {"fetched_url": TARGET_URL, "error": str(e)}
 
 @app.get("/")
 async def image_home():
