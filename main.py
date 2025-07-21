@@ -224,49 +224,77 @@ async def image_home():
             cur.execute("SELECT username, content, timestamp FROM comments ORDER BY timestamp DESC LIMIT 32")
             rows = cur.fetchall()
 
-    width = 800
-    max_text_width = 780  # 10px margin mỗi bên
-    line_height = 18
-    margin_left = 10
-    margin_top = 10
-
     try:
         font = ImageFont.truetype("Roboto-Regular.ttf", 14)
     except IOError:
         font = ImageFont.load_default()
 
-    # Tính chiều cao hình ảnh động dựa trên số dòng thực tế
-    wrapped_lines = []
+    max_text_width = 780
+    line_height = 18
+    margin_left = 10
+
+    # Hàm đo chiều rộng văn bản
+    def draw_text_width(drawer, text, font):
+        return drawer.textlength(text, font=font)
+
+    # Tạo ảnh tạm để đo văn bản
+    dummy_image = Image.new("RGB", (1, 1))
+    dummy_draw = ImageDraw.Draw(dummy_image)
+
+    # Hàm wrap thông minh
+    def wrap_text(drawer, text, font, max_width):
+        words = text.split(' ')
+        lines = []
+        current_line = ""
+
+        for word in words:
+            test_line = f"{current_line} {word}".strip()
+            if draw_text_width(drawer, test_line, font) <= max_width:
+                current_line = test_line
+            else:
+                # Nếu từ quá dài
+                if draw_text_width(drawer, word, font) > max_width:
+                    if current_line:
+                        lines.append(current_line)
+                    # Cắt từ quá dài
+                    part = ""
+                    for char in word:
+                        test_part = part + char
+                        if draw_text_width(drawer, test_part, font) <= max_width:
+                            part = test_part
+                        else:
+                            lines.append(part)
+                            part = char
+                    if part:
+                        current_line = part
+                    else:
+                        current_line = ""
+                else:
+                    lines.append(current_line)
+                    current_line = word
+        if current_line:
+            lines.append(current_line)
+        return lines
+
+    # Tính tổng chiều cao ảnh cần thiết
+    all_lines = []
     for row in reversed(rows):
         timestamp, username, content = row[2], row[0], row[1]
-        text = f"[{timestamp}]<{username}>: {content}"
-        line = ""
-        words = text.split()
-        for word in words:
-            if draw_text_width(draw, f"{line} {word}".strip(), font) <= max_text_width:
-                line = f"{line} {word}".strip()
-            else:
-                if line:
-                    wrapped_lines.append(line)
-                # xử lý từ dài không dấu cách (vượt max width)
-                if draw_text_width(word, font=font) > max_text_width:
-                    wrapped_long = break_long_word(word, max_text_width, font, draw)
-                    wrapped_lines.extend(wrapped_long[:-1])
-                    line = wrapped_long[-1]
-                else:
-                    line = word
-        if line:
-            wrapped_lines.append(line)
+        full_text = f"[{timestamp}]<{username}>: {content}"
+        wrapped_lines = wrap_text(dummy_draw, full_text, font, max_text_width)
+        all_lines.extend(wrapped_lines)
 
-    height = max(300, len(wrapped_lines) * line_height + 20)
+    height = max(300, len(all_lines) * line_height + 20)
+    width = 800
     image = Image.new("RGB", (width, height), color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
 
     for y in range(0, height, 20):
         draw.line((0, y, width, y), fill=(220, 220, 220))
 
-    y = margin_top
-    for line in wrapped_lines:
+    # Vẽ văn bản thực tế
+    y = 10
+    for line in all_lines:
         draw.text((margin_left, y), line, font=font, fill=(0, 0, 0))
         y += line_height
 
