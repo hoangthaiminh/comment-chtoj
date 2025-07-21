@@ -198,6 +198,25 @@ async def comment_page(request: Request):
 #     except requests.RequestException as e:
 #         return {"fetched_url": TARGET_URL, "error": str(e)}
 
+def draw_text_width(draw, text, font):
+    """Trả về độ dài tính bằng pixel của một chuỗi văn bản."""
+    return draw.textlength(text, font=font)
+
+def break_long_word(word, max_width, font, draw):
+    """Tách một từ dài không dấu cách thành các đoạn nhỏ vừa với max_width."""
+    parts = []
+    current = ""
+    for char in word:
+        if draw_text_width(draw, current + char, font) <= max_width:
+            current += char
+        else:
+            if current:
+                parts.append(current)
+            current = char
+    if current:
+        parts.append(current)
+    return parts
+
 @app.get("/")
 async def image_home():
     with psycopg2.connect(**conn_args) as conn:
@@ -205,39 +224,51 @@ async def image_home():
             cur.execute("SELECT username, content, timestamp FROM comments ORDER BY timestamp DESC LIMIT 32")
             rows = cur.fetchall()
 
-    width, height = 800, max(300, len(rows) * 18 + 20)
-    image = Image.new("RGB", (width, height), color=(255, 255, 255))
-    draw = ImageDraw.Draw(image)
-
-    for y in range(0, height, 20):
-        draw.line((0, y, width, y), fill=(220, 220, 220))
+    width = 800
+    max_text_width = 780  # 10px margin mỗi bên
+    line_height = 18
+    margin_left = 10
+    margin_top = 10
 
     try:
         font = ImageFont.truetype("Roboto-Regular.ttf", 14)
     except IOError:
         font = ImageFont.load_default()
 
-    y = 10
+    # Tính chiều cao hình ảnh động dựa trên số dòng thực tế
+    wrapped_lines = []
     for row in reversed(rows):
         timestamp, username, content = row[2], row[0], row[1]
         text = f"[{timestamp}]<{username}>: {content}"
-        lines = []
-        max_width = 780  # allow 10px margin on left and right
-        words = text.split()
         line = ""
+        words = text.split()
         for word in words:
-            test_line = f"{line} {word}".strip()
-            if draw.textlength(test_line, font=font) <= max_width:
-                line = test_line
+            if draw_text_width(draw, f"{line} {word}".strip(), font) <= max_text_width:
+                line = f"{line} {word}".strip()
             else:
-                lines.append(line)
-                line = word
+                if line:
+                    wrapped_lines.append(line)
+                # xử lý từ dài không dấu cách (vượt max width)
+                if draw_text_width(word, font=font) > max_text_width:
+                    wrapped_long = break_long_word(word, max_text_width, font, draw)
+                    wrapped_lines.extend(wrapped_long[:-1])
+                    line = wrapped_long[-1]
+                else:
+                    line = word
         if line:
-            lines.append(line)
+            wrapped_lines.append(line)
 
-        for l in lines:
-            draw.text((10, y), l, font=font, fill=(0, 0, 0))
-            y += 18
+    height = max(300, len(wrapped_lines) * line_height + 20)
+    image = Image.new("RGB", (width, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
+
+    for y in range(0, height, 20):
+        draw.line((0, y, width, y), fill=(220, 220, 220))
+
+    y = margin_top
+    for line in wrapped_lines:
+        draw.text((margin_left, y), line, font=font, fill=(0, 0, 0))
+        y += line_height
 
     img_bytes = io.BytesIO()
     image.save(img_bytes, format="PNG")
