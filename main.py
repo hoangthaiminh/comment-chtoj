@@ -188,6 +188,24 @@ init_db()
 async def comment_page(request: Request):
     return templates.TemplateResponse("comment.html", {"request": request})
 
+@app.get("/reset", response_class=HTMLResponse)
+async def reset_comments(request: Request):
+    password = request.query_params.get("pass")
+    correct_password = "mymylminlord368hasi"  # thay bằng mật khẩu thật của bạn
+
+    if password is None:
+        return "<b><u>Please enter password by using '/reset?pass=...'</u></b>"
+
+    if password != correct_password:
+        return "<b><u>Password WRONG</u></b>"
+
+    with psycopg2.connect(**conn_args) as conn:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM comments")
+        conn.commit()
+
+    return "<b><u>Reset OK!</u></b>"
+
 # @app.get("/ubort")
 # async def ubort():
 #     time.sleep(1)
