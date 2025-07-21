@@ -190,7 +190,7 @@ async def comment_page(request: Request):
 
 @app.get("/ubort")
 async def ubort():
-    time.sleep(5)
+    time.sleep(1)
     TARGET_URL = "https://ubort.onrender.com"
     try:
         response = requests.get(TARGET_URL, timeout=5)
