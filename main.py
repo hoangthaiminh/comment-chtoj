@@ -298,7 +298,7 @@ async def image_home():
     all_lines = []
     for row in reversed(rows):
         timestamp, username, content = row[2], row[0], row[1]
-        full_text = f"[{timestamp}]{username}: {content}"
+        full_text = f"[{timestamp}] <{username}>: {content}"
         wrapped_lines = wrap_text(dummy_draw, full_text, font, max_text_width)
         all_lines.extend(wrapped_lines)
 
