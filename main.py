@@ -332,7 +332,6 @@ async def submit_comment(username: str = Form(...), content: str = Form(...)):
         return {"status": "error", "message": "Bình luận không hợp lệ."}
 
     now = datetime.now()
-    now = now.strftime("%H:%M %d-%m-%Y")
 
     with psycopg2.connect(**conn_args) as conn:
         with conn.cursor() as cur:
