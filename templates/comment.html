@@ -5,12 +5,19 @@
   <title>Gửi bình luận</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-  <form>
-    <img id="comment-real-time" src="">
+ <body>
+ <form id="comment-real-time" onsubmit="return false;">
+  <label for="content">Các bình luận:</label>
+  
+  <div style="max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 5px;">
+    <img id="commentImage" src="/?t=0" alt="Bình luận realtime" style="width: 100%; display: block;">
+  </div>
+  
+  <br>
+  <button type="button" onclick="refreshImage()">🔄 Làm mới ảnh</button>
   </form>
   <form id="commentForm">
-    <label for="content">Bình luận:</label>
+    <label for="content">Đăng bình luận:</label>
     <textarea id="content" name="content" rows="5" maxlength="300" required></textarea>
 
     <button type="submit">Đăng</button>
@@ -32,6 +39,7 @@
     const usernameInput = document.getElementById('dialogUsername');
     const contentInput = document.getElementById('content');
     const form = document.getElementById('commentForm');
+    const realTimeForm = document.getElementById('comment-real-time');
     const statusDiv = document.getElementById('status');
     const dialog = document.getElementById('nameDialog');
     const saveNameButton = document.getElementById('saveName');
