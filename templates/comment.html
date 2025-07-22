@@ -16,6 +16,7 @@
   <br>
   <button type="button" onclick="refreshImage()">🔄 Làm mới ảnh</button>
   </form>
+   <br>
   <form id="commentForm">
     <label for="content">Đăng bình luận:</label>
     <textarea id="content" name="content" rows="5" maxlength="300" required></textarea>
@@ -58,6 +59,7 @@
       };
     
       img.src = `/?t=${Date.now()}`; // tránh cache
+      console.log(111);
     }
     saveNameButton.addEventListener('click', (e) => {
       e.preventDefault();
