@@ -300,7 +300,10 @@ async def image_home():
         timestamp, username, content = row[2], row[0], row[1]
         formatted_time = timestamp.strftime('%H:%M %d-%m-%Y')  # ✅ Định dạng thời gian đẹp
         full_text = f"[{formatted_time}] <{username}>: {content}"
-        wrapped_lines = wrap_text(dummy_draw, full_text, font, max_text_width)
+        # wrapped_lines = wrap_text(dummy_draw, full_text, font, max_text_width)
+        for comment_line in full_text.splitlines():
+            wrapped_lines = wrap_text(dummy_draw, comment_line, font, max_text_width)
+            all_lines.extend(wrapped_lines)
         all_lines.extend(wrapped_lines)
 
     height = max(300, len(all_lines) * line_height + 20)
