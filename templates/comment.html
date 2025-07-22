@@ -48,6 +48,17 @@
       dialog.showModal();
     }
 
+    function refreshImage(callback) {
+      const img = document.getElementById('commentImage');
+      const container = img.parentElement;
+    
+      img.onload = () => {
+        container.scrollTop = container.scrollHeight;
+        if (typeof callback === 'function') callback();
+      };
+    
+      img.src = `/?t=${Date.now()}`; // tránh cache
+    }
     saveNameButton.addEventListener('click', (e) => {
       e.preventDefault();
       const name = usernameInput.value.trim();
@@ -89,6 +100,7 @@
         statusDiv.textContent = 'Đăng bình luận thành công!';
         statusDiv.style.color = 'green';
         contentInput.value = '';
+        refreshImage();
       } else {
         statusDiv.textContent = data.message || 'Lỗi không xác định.';
         statusDiv.style.color = 'red';
